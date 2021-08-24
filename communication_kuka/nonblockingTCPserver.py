@@ -1,0 +1,449 @@
+# Author: Santiago Gil
+import tcpnonblock
+import signal
+import sys
+import os
+from IPython import embed
+import zmq
+import time
+from pymodbus.client.sync import ModbusTcpClient
+
+server = tcpnonblock.TCPSocketServer(threaded=True) # Create a Server Object
+
+
+#######  ZMQ  #########
+port_zmq = "5557"
+context = zmq.Context()
+socket_zmq = context.socket(zmq.PUB)
+socket_zmq.bind("tcp://*:" + port_zmq)
+
+####### End ZMQ #######
+
+####### Modbus (Gripper) ######
+unit = 0x41
+t_diameter_register = 0x0000
+t_speed_register = 0x0002
+t_control_register = 0x0003
+t_force_register = 0x0004
+
+modbus_client = ModbusTcpClient(host='192.168.1.101', port=502)
+modbus_client.connect()
+
+
+####### End Modbus ######
+
+def signal_handler(signal, frame): # Signal handler to catch CTRL + C
+    sys.exit(0)
+
+def send_command(cmd):
+    global server
+    clients = server.connected
+    for client in clients:
+        client.send(cmd)
+
+def gripper_pick(sleep_time,diameter=360,speed=10,force=1000):
+    modbus_client.write_register(t_force_register, force)
+    modbus_client.write_register(t_diameter_register, diameter)
+    modbus_client.write_register(t_speed_register, speed)
+    modbus_client.write_register(0x0003, 1)
+    time.sleep(sleep_time)
+
+def gripper_place(sleep_time,diameter=450,speed=10,force=20):
+    modbus_client.write_register(t_force_register, force)
+    modbus_client.write_register(t_diameter_register, diameter)
+    modbus_client.write_register(t_speed_register, speed)
+    modbus_client.write_register(0x0003, 1)
+    time.sleep(sleep_time)
+
+def execute_example(sleep_time):
+    send_command("movelrel(600,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-145,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-95,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-95,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-95,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-45,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-45,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-45,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,5,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,5,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,5,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,55,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,55,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,55,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,105,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,155,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,155,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,155,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,205,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,205,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,205,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,255,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,255,250,-91.55,0.13,-179.36)\n")
+
+def execute_pick_and_place_basics(sleep_time):
+    gripper_place(sleep_time)
+    send_command("movelrel(600,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-145,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_pick(sleep_time)
+    send_command("movelrel(600,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-95,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-95,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_place(sleep_time)
+    send_command("movelrel(600,-95,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-45,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-45,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_pick(sleep_time)
+    send_command("movelrel(600,-45,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,5,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,5,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_place(sleep_time)
+    send_command("movelrel(600,5,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,55,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,55,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_pick(sleep_time)
+    send_command("movelrel(600,55,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,105,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_place(sleep_time)
+    send_command("movelrel(600,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,155,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,155,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_pick(sleep_time)
+    send_command("movelrel(600,155,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,205,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,205,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_place(sleep_time)
+    send_command("movelrel(600,205,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,255,150,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    gripper_pick(sleep_time)
+    send_command("movelrel(600,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,255,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+
+def execute_pick_and_place_DT(sleep_time):
+    # D
+    ## 1 piece
+    send_command("movelrel(350,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(350,255,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(350,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(450,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(450,-145,170,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(450,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 2 piece
+    send_command("movelrel(350,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(350,305,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(350,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,-145,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(500,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 3 piece
+    send_command("movelrel(350,355,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(350,355,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(350,355,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,-145,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(550,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 4 piece
+    send_command("movelrel(400,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,255,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(400,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-145,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(600,-145,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 5 piece
+    send_command("movelrel(400,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,305,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(400,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(450,-95,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(450,-95,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(450,-95,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 6 piece
+    send_command("movelrel(400,355,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,355,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(400,355,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-95,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,-95,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(600,-95,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 7 piece
+    #send_command("movelrel(450,255,250,-91.55,0.13,-179.36)\n")
+    #time.sleep(sleep_time)
+    #send_command("movelrel(450,255,150,-91.55,0.13,-179.36)\n")
+    #gripper_pick(sleep_time)
+    #send_command("movelrel(450,255,250,-91.55,0.13,-179.36)\n")
+    #time.sleep(sleep_time)
+    #send_command("movelrel(450,-45,250,-91.55,0.13,-179.36)\n")
+    #time.sleep(sleep_time)
+    #send_command("movelrel(450,-45,150,-91.55,0.13,-179.36)\n")
+    #gripper_place(sleep_time)
+    #send_command("movelrel(450,-45,250,-91.55,0.13,-179.36)\n")
+    #time.sleep(sleep_time)
+    ## 8 piece
+    send_command("movelrel(450,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(450,305,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(450,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,-45,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,-45,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(500,-45,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 9 piece
+    send_command("movelrel(450,355,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(450,355,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(450,355,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,-45,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,-45,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(550,-45,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+
+    ## T
+    ## 10 piece
+    send_command("movelrel(500,205,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,205,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(500,205,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,55,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,55,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(400,55,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 11 piece
+    send_command("movelrel(500,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,255,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(500,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,105,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(400,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 12 piece
+    send_command("movelrel(500,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,305,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(500,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,155,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(400,155,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(400,155,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 13 piece
+    send_command("movelrel(500,355,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,355,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(500,355,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(450,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(450,105,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(450,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 14 piece
+    send_command("movelrel(550,205,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,205,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(550,205,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(500,105,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(500,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 15 piece
+    send_command("movelrel(550,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,255,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(550,255,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,105,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(550,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    ## 16 piece
+    send_command("movelrel(550,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(550,305,150,-91.55,0.13,-179.36)\n")
+    gripper_pick(sleep_time)
+    send_command("movelrel(550,305,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,105,250,-91.55,0.13,-179.36)\n")
+    time.sleep(sleep_time)
+    send_command("movelrel(600,105,150,-91.55,0.13,-179.36)\n")
+    gripper_place(sleep_time)
+    send_command("movelrel(600,105,250,-91.55,0.13,-179.36)\n")
+
+
+signal.signal(signal.SIGINT, signal_handler) # Assigning handler to exit program
+
+
+# Create a Client Instance for the Server
+@server.client_instance
+class ClientInstance(tcpnonblock.TCPSocketServerInstance):
+    # On Client Connect
+    def connect(self):
+        print("Client Connected")
+
+    # On Client Disconnect
+    def disconnect(self):
+        print("Client Disconnected")
+
+    # On Client Message
+    def message(self, msg):
+        #print("Client Message: ",msg)
+        if os.path.isfile('joint_position_data.csv'):
+            pass
+        else:
+            with open("joint_position_data.csv","w") as file:
+                header = "timestamp,actual_q_0,actual_q_1,actual_q_2,actual_q_3,actual_q_4,actual_q_5,actual_q_6,target_q_0,target_q_1,target_q_2,target_q_3,target_q_4,target_q_5,target_q_6,"
+                header += "measured_tq_0,measured_tq_1,measured_tq_2,measured_tq_3,measured_tq_4,measured_tq_5,measured_tq_6,external_tq_0,external_tq_1,external_tq_2,external_tq_3,external_tq_4,external_tq_5,external_tq_6,"
+                header += "force_X,force_Y,force_Z\n"
+                file.write(header)
+                file.close()
+
+        try:
+            with open("joint_position_data.csv","a") as file:
+                file.write(msg)
+            try:
+                splt_msg = str(msg).split(",")
+                if len(splt_msg) > 5:
+                    positions = splt_msg[1:8]
+                    for i in range(len(positions)):
+                        socket_zmq.send_string(f"actual_q_{i} {positions[i]}")
+            except Exception as e:
+                pass
+        except Exception as exc:
+            pass
+
+# On Server Start Event
+@server.on_start
+def start(host, port):
+    print("Server Starts")
+
+# On Server Stop Event
+@server.on_stop
+def stop():
+    print("Server Stops")
+
+# Start the Server
+server.listen("0.0.0.0", 30001) # Host,Port
+server.daemon = True
+server.start()
+embed()

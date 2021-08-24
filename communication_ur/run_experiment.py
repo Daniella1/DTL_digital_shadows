@@ -34,7 +34,7 @@ ur5e = RobotConnection(vm_ip) # Establish dashboard connection (port 29999) and 
 f_name = "test_motion1.csv"
 filename = Path("test_results") / Path(f_name)
 config_file =  Path("resources") / Path("record_configuration.xml")
-ur5e.start_recording(filename=filename, overwrite=True, config_file=config_file, publish_topic=["actual_q"]) # start recording and place the recorded data in test_motion.csv
+ur5e.start_recording(filename=filename, overwrite=True, frequency=50, config_file=config_file, publish_topic=["actual_q"]) # start recording and place the recorded data in test_motion.csv
 
 time.sleep(1)
 
@@ -44,10 +44,15 @@ while True:
     if k == "c":
         break
     elif k in {"1","2","3","4","5","6","7","8","9"}:
-        for i in range(int(k)):
+        if k == "1":
+            ur5e.load_program("/programs/test_movement.urp")
+            ur5e.play_program()
+        elif k == "2":
+            ur5e.load_program("/programs/short_program.urp")
+            ur5e.play_program()
+        elif k == "3":
             ur5e.load_program("/programs/screw_points.urp")
             ur5e.play_program()
-            time.sleep(90)
     
     # reset k
     k = "a"
