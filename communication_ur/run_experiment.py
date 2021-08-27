@@ -7,6 +7,7 @@ import time
 import msvcrt
 from points import *
 
+
 def deg_to_rad(deg):
     rad = deg * pi / 180
     return rad
@@ -28,7 +29,8 @@ def tighten_screw(robot, previous_waypoint):
 
 v0 = 1.0
 a0 = 5.0
-vm_ip = "192.168.1.2"
+# vm_ip = "192.168.1.2"
+vm_ip = "192.168.142.128"
 ur5e = RobotConnection(vm_ip) # Establish dashboard connection (port 29999) and controller connection (port 30002)
 
 f_name = "test_motion1.csv"
@@ -39,6 +41,12 @@ ur5e.start_recording(filename=filename, overwrite=True, frequency=50, config_fil
 time.sleep(1)
 
 
+# while True:
+#     ur5e.load_program("/programs/test_movement.urp")
+#     ur5e.play_program()
+#     time.sleep(10)
+
+
 while True:
     k = msvcrt.getwche()
     if k == "c":
@@ -47,6 +55,7 @@ while True:
         if k == "1":
             ur5e.load_program("/programs/test_movement.urp")
             ur5e.play_program()
+            time.sleep(10)
         elif k == "2":
             ur5e.load_program("/programs/short_program.urp")
             ur5e.play_program()
@@ -56,20 +65,5 @@ while True:
     
     # reset k
     k = "a"
-
-# while True:
-#     k = msvcrt.getwche()
-#     if k == "c":
-#         break
-#     elif k in {"1","2","3","4","5","6","7","8","9"}:
-#         for i in range(int(k)):
-#             ur5e.movej(home)
-#             ur5e.movej(deg_to_rad(a82))
-#             # loosen_screw(ur5e, a82)           
-#             # tighten_screw(ur5e, a82)
-    
-#     # reset k
-#     k = "a"
-
 
 ur5e.stop_recording()

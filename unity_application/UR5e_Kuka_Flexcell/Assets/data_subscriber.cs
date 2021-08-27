@@ -66,6 +66,8 @@ public class data_subscriber : MonoBehaviour
     }
     void Start()
     {
+        Application.targetFrameRate = 30;
+
         if (enable_tcp_connection)
         {
             _robotarm_ctrl = gameObject.GetComponent<Controller>();
