@@ -12,7 +12,7 @@ server = tcpnonblock.TCPSocketServer(threaded=True) # Create a Server Object
 
 
 #######  ZMQ  #########
-port_zmq = "5556"
+port_zmq = "5557"
 context = zmq.Context()
 socket_zmq = context.socket(zmq.PUB)
 socket_zmq.bind("tcp://*:" + port_zmq)

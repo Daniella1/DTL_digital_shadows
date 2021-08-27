@@ -29,8 +29,8 @@ def tighten_screw(robot, previous_waypoint):
 
 v0 = 1.0
 a0 = 5.0
-# vm_ip = "192.168.1.2"
-vm_ip = "192.168.142.128"
+vm_ip = "192.168.1.2"
+# vm_ip = "192.168.142.128"
 ur5e = RobotConnection(vm_ip) # Establish dashboard connection (port 29999) and controller connection (port 30002)
 
 f_name = "test_motion1.csv"
